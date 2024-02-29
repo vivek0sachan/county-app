@@ -3,7 +3,7 @@ const app = require('./app');
 // const db= require('./db')
 
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 4000;
 const server=http.createServer(app);
-
+console.log('Server is running on port: ' + port)
 server.listen(port);

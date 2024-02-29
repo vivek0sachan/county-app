@@ -110,29 +110,7 @@ router.get('/all', (req, res, next) => {
 }
 );
 
-router.get('',(req,res,next)=>{
-    id = req.query.id;
-    country_name= req.query.name;
-    query={
-        country_id:id,
-        name:country_name
-    };
-    Country.find(query).then(documents => {
-        data = documents;
-        let message = 'Country fetched successfully!';
-        if(data == null || data.length == 0){
-            console.log('Country not found!');
-            message = 'Country not found!';
-        }
-        res.status(200).json({
-            message: message,
-            countries: data
-        });
-    });
-    res.status(200).json({
-        message: 'Handling GET requests to /country'
-    });
-});
+
 
 router.get('/:country_id', (req, res, next) =>{
     let  id=req.params.country_id;
