@@ -3,8 +3,6 @@ const mongoose = require('mongoose');
 const router = express.Router();
 const Country = require('../models/country');
 const Neighbour = require('../models/neighbour');
-const neighbour = require('../models/neighbour');
-const e = require('express');
 
 router.use(express.json()); 
 
