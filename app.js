@@ -8,7 +8,11 @@ const router=express.Router();
 const config=require('./config');
 
 const mongo_uri=config.uri;
+
 mongoose.connect(mongo_uri)
+.then(()=>{
+    console.log('Connected to database');
+})
 .catch(()=>{
     console.log('Connection failed');
 });
@@ -16,7 +20,7 @@ mongoose.connect(mongo_uri)
 const countryRoutes=require('./apis/routes/country');
 
 // middleware
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 app.use('/country',countryRoutes);
 
 app.get('/test', (req, res) => {

@@ -96,17 +96,85 @@ router.post('/fill-neighbours', async (req, res, next) => {
 });
 
 
-router.get('/all', (req, res, next) => {
-    let data;
-    Country.find().then(documents => {
-        data = documents;
-        res.status(200).json({
-            message: 'Country fetched successfully!',
-            countries: data
+router.get('', (req, res, next) => {
+
+    let page = parseInt(req.query.page, 10) || 1;
+    const limit = parseInt(req.query.limit, 10) || 10;
+    const skip = (page - 1) * limit;
+    const sort_by=req.query.sort_by || 'a_to_z';
+    const c_name=req.query.name || '';
+    const region=req.query.region || '';
+    const subregion = req.query.subregion || '';
+
+    let total;
+
+    query={};
+    if (c_name!='')
+    {
+        query.name = { $regex: new RegExp(c_name, "i") };
+    }
+    else if(region!='')
+    {
+        query.region={$regex: new RegExp(region, "i")};
+    }
+    else if(subregion!='')
+    {
+        query.subregion={$regex: new RegExp(subregion, "i")};
+    }
+
+    Country.countDocuments()
+        .then(count => {
+            total = count;
+            if (page === -1) {
+                // If page is -1, return all documents
+                return Country.find(query);
+            } else {
+                // Otherwise, return documents for the current page
+                return Country.find(query).sort(sort_param(sort_by)).skip(skip).limit(limit);
+            }
+        })
+        .then(countries => {
+            res.json({
+                page: page,
+                total: total,
+                items: countries.length,
+                has_next: countries.length === limit,
+                has_prev: page > 1,
+                countries: countries
+            });
+        })
+        .catch(err => {
+            next(err);
         });
-    });
+});
+
+function sort_param(sort_by){
+    switch (sort_by) {
+        case 'a_to_z':{
+            return { name: 1 };
+        }
+        case 'z_to_a':{
+            return { name: -1 };
+        };
+        case 'population_high_to_low':{
+            return { population: -1 };
+        };
+        case 'population_low_to_high':{
+            return { population: 1 };
+        };
+
+        case 'area_high_to_low':{
+            return { area: -1 };
+        };
+        case 'area_low_to_high':{
+            return { area: 1 };
+        };
+        default:{
+            return { name: 1 };
+        }
+    }
 }
-);
+
 
 
 
@@ -165,77 +233,6 @@ router.get('/neighbours/:country_id', (req, res, next) =>{
 }
 );
 });
-
-// api with search sort and pagination  search a countries by:Name Region Subregion
-function validateParams(req, res, next) {
-    let page = req.query.page || 1;
-    let per_page = req.query.per_page|| 10;
-    let sort = req.query.sort || 'a_to_z';
-    let region = req.query.region || '';
-    let subregion = req.query.subregion || '';
-    let name = req.query.name || '';
-
-    if (page && isNaN(page)) {
-        res.status(400).send('Invalid page');
-    } else if (per_page && isNaN(per_page)) {
-
-    } else if (sort && !['a_to_z', 'z_to_a', 'population_high_to_low','population_low_to_high',
-        'area_high_to_low', 'area_low_to_high'].includes(sort)) {
-        res.status(400).send('Invalid sort');
-    } else if ( typeof region !== 'string') {
-        res.status(400).send('Invalid region');
-    } else if ( typeof subregion !== 'string') {
-        res.status(400).send('Invalid subregion');
-    }else if(typeof name !== 'string'){
-        res.status(400).send('Invalid name');
-    }
-    else {
-        next();
-    }
-}
-
-
-// router.get('/search', validateParams, async (req, res) => {
-//     const { name, page = 1, per_page = 10, sort, region, subregion } = req.query;
-//     let query = {};
-//     if (name) {
-//         query.name = { $regex: name, $options: 'i' }; 
-//     }
-//     if (region) {
-//         query.region = { $regex: region, $options: 'i'}
-//     }
-//     if (subregion) {
-//         query.subregion = { $regex: subregion, $options: 'i' }
-//     }
-
-//     // Create the options
-//     let options = {
-//         sort: {},
-//         page: parseInt(page, 10),
-//         limit: parseInt(per_page, 10)
-//     };
-//     if (sort) {
-//         options.sort[sort] = 1; // Sort by the provided field
-//     }
-
-//     try {
-//         // Execute the query with pagination
-//         const result = await Country.paginate(query, options);
-
-//         res.status(200).json({
-//             message: 'Countries fetched successfully!',
-//             countries: result.docs,
-//             totalPages: result.totalPages,
-//             currentPage: result.page,
-//             hasnext: result.hasNextPage,
-//         });
-//     } catch (err) {
-//         console.error('Error fetching countries:', err);
-//         res.status(500).json({ message: 'Error fetching countries' });
-//     }
-// });
-
-
 
 module.exports = router;
 
