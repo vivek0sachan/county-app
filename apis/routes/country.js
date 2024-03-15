@@ -122,7 +122,7 @@ router.get('', (req, res, next) => {
         query.subregion={$regex: new RegExp(subregion, "i")};
     }
 
-    Country.countDocuments()
+    Country.countDocuments()sudo docker rm container_name
         .then(count => {
             total = count;
             if (page === -1) {

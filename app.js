@@ -1,3 +1,4 @@
+const serverless =require('serverless-http');
 const express = require('express');
 const app = express();
 const morgan=require('morgan');
@@ -48,4 +49,4 @@ app.use((error,req,res,next)=>{
 
 
 
-module.exports = app
+module.exports.handler = serverless(app);
