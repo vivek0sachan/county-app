@@ -21,7 +21,7 @@ mongoose.connect(mongo_uri)
 const countryRoutes=require('./apis/routes/country');
 
 // middleware
-// app.use(morgan('dev'));
+app.use(morgan('dev'));
 app.use('/country',countryRoutes);
 
 app.get('/test', (req, res) => {
